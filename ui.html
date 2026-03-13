@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空繪生命線</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>空繪生命線</h1>
+    </div>
+<!-- 按钮 -->
+<div class="button-container">
+    <button id="flight-point-button" onclick="openFlightPointSetup()" >設定飛控點位</button>
+    <button id="open-dronemapping2-button" onclick="startMapping()" >上傳建圖圖片</button>
+</div>
+<div class="tab" style="margin-top:-15px;">
+  <button class="tablinks active" onclick="openTab(event, 'drone1')"><strong style="font-size: 20px;">無人機:</strong> <span id="device_id">Loading...</span> <span class="loading"></span></button>
+</div>
+
+<div id="drone1" class="tabcontent active">
+  <div style="display: flex; align-items: center; justify-content: flex-start; margin-top: 10px;">
+      <div class="battery-container">
+          <div class="battery">
+              <div class="battery-level" id="battery_level_drone1" style="height: 50%;"></div>
+          </div>
+          <!--div style="text-align: center; margin-top: 15px; margin-left: 65px; font-weight: bold; font-size: 28px;"><strong>電池:</strong><span id="battery_capacity">Loading...</span></div-->
+          <div style="text-align: center; margin-top: 32px; margin-left: 66px; font-weight: bold; font-size: 27px;">
+        <span id="battery_capacity">電池: Loading...</span>
+</div>
+
+      </div>
+
+      <div class="compass">
+        <!-- 外圓 -->
+        <div class="compass-outer">
+            <!-- 內圓 -->
+            <div class="compass-inner">
+                <!-- 方向指示 -->
+                <div class="directions">
+                    <div class="direction1 north">N</div>
+                    <div class="direction1 east">E</div>
+                    <div class="direction1 south">S</div>
+                    <div class="direction1 west">W</div>
+    
+                    <div class="direction2 northeast">NE</div>
+                    <div class="direction2 southeast">SE</div>
+                    <div class="direction2 southwest">SW</div>
+                    <div class="direction2 northwest">NW</div>
+                </div>
+                <!-- 指針 -->
+                <div id="compassNeedle" class="needle">
+                    <div class="needle-half top"></div>
+                    <div class="needle-half bottom"></div>
+                </div>
+                <!-- 中心點 -->
+                    <div class="center-dot"></div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 19px; margin-left: 30px; font-weight: bold; font-size: 27px;">
+                <span id="compass">航向角:Loading...</span>
+            </div>
+        </div>  
+
+        <div class="speed-container">
+            <canvas class="speed-canvas" id="speedometer" width="220" height="220"></canvas>
+            <div style="text-align: center; margin-top: 16px; margin-left: 15px; font-weight: bold; font-size: 27px;">
+                <span id="drone_speed">速度:Loading...</span>
+            </div>
+        </div>
+
+      <div class="container">
+          <div class="box" data-color="yellow" style="color: black;"><strong>經度:</strong> <span id="latitude">Loading...</span></div>
+          <div class="box" data-color="yellow" style="color: black;"><strong>緯度:</strong> <span id="longitude">Loading...</span></div>
+          <div class="box" data-color="yellow" style="color: black;"><strong>海拔:</strong> <span id="altitude">Loading...</span></div>
+      </div>
+  </div>
+  <div class="image-container">
+    <!-- 左側 攝影機畫面 -->
+    <div class="video-container">
+        <div style="display: flex; align-items: center; margin-top: 2px;">
+            <h2 style="margin-right: 20px;">攝影機畫面</h2>
+            <button class="camera-btn" style="margin-right: 5px;" onclick="enablePhotoCapture()">開始拍攝</button>
+            <button class="camera-btn" onclick="disablePhotoCapture()">暫停拍攝</button>
+          </div>
+        <img id="droneCamera1" style="width: 56%; max-width: 640px; border: 2px solid #fff;">
+    </div>
+
+    <!-- 右側 建模後的地圖 -->
+    <div class="map-container">
+        <h2 style="margin-right: 165px;">建模後的地圖</h2>
+        <button id="open-Shortest-button" onclick="openShortestPath()">計算最短路徑</button>
+        <!--div class="lidar-placeholder"-->
+            <img src="map.png" id="mapImage" style="width: 55%; height: 70%; border: 2px solid #fff;">
+            <!--div id="mapImagePlaceholder" class="map"></div-->
+        </div>
+    </div>
+</div>
+
+</div>
+</body>
+<script>
+let currentSpeed = 0; // 當前速度 (用於平滑動畫)
+
+function drawSpeedometer(targetSpeed) {
+    const canvas = document.getElementById("speedometer");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 90;
+
+    // 平滑過渡速度
+    currentSpeed += (targetSpeed - currentSpeed) * 0.1;
+
+    // 繪製外圈
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0.75 * Math.PI, 2.25 * Math.PI);
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 10;
+    ctx.stroke();
+
+    // 繪製刻度
+    for (let i = 0; i <= 180; i += 20) {
+        let angle = (0.75 + (i / 180) * 1.5) * Math.PI;
+        let x1 = centerX + Math.cos(angle) * (radius - 12);
+        let y1 = centerY + Math.sin(angle) * (radius - 8);
+        let x2 = centerX + Math.cos(angle) * radius;
+        let y2 = centerY + Math.sin(angle) * radius;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = "#888";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 標示數值
+        let textX = centerX + Math.cos(angle) * (radius - 25);
+        let textY = centerY + Math.sin(angle) * (radius - 20);
+        ctx.font = "13px Arial ";
+        ctx.fillStyle = "#fff";
+        ctx.fillText(i, textX - 8, textY + 3);
+    }
+
+    // 繪製指針
+    let angle = (0.75 + (currentSpeed / 180) * 1.5) * Math.PI;
+    let needleX = centerX + Math.cos(angle) * (radius - 25);
+    let needleY = centerY + Math.sin(angle) * (radius - 25);
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(needleX, needleY);
+    ctx.strokeStyle = "#ff0000";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // 繪製中心圓點
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 4, 0, 2 * Math.PI);
+    ctx.fillStyle = "#ff0000";
+    ctx.fill();
+
+    // 顯示當前速度
+    ctx.font = "15px Arial";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(`${Math.round(currentSpeed)} km/h`, centerX - 30, centerY + 45);
+
+    // 連續更新畫面，直到達到目標速度
+    if (Math.abs(currentSpeed - targetSpeed) > 0.1) {
+        requestAnimationFrame(() => drawSpeedometer(targetSpeed));
+    }
+}
+function openFlightPointSetup() {
+    window.open('mapping.html', '_blank');
+}
+function openShortestPath() {
+    fetch('http://127.0.0.1:5000/run_shortest_path')
+    .then(res => res.json())
+    .then(res => alert(res.message));
+}
+function startMapping() {
+            fetch("http://127.0.0.1:8800/select_folder", { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                console.log(data.output || data.error);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("錯誤：" + err);
+            });
+        }
+    
+</script>
+</html>

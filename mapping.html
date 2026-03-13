@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenStreetMap 矩形選區</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <style>
+        body {
+            background: #E3EAFD;
+        }
+        #map {
+            height: 630px;
+            width: 100%;
+        }
+        #info { margin-top: 0.1px; }
+        h2 {
+            font-size: 24px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 20px;
+            background-color: #4286F3;
+            border-radius: 20px;
+            color: white;
+            font-weight: 500;
+            margin-right: 5px;
+        }
+        .markers-info {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .leaflet-draw-actions {
+            display: none !important;
+        }
+        .leaflet-div-icon.leaflet-editing-icon {
+            border-radius: 50% !important; /* 變圓 */
+            background-color: white !important; /* 白色背景 */
+            border: 2px solid #3388ff !important; /* 外框藍色 */
+            width: 10px !important;
+            height: 10px !important;
+            margin-left: -7px !important;
+            margin-top: -7px !important;
+        }
+    </style>
+</head>
+<body>
+    <h2>請拉出飛行矩形區域</h2>
+    <div id="map"></div>
+    <div id="info"></div>
+    <div style="margin-top: 13px;">
+        <button id="resetMarkers">重新選擇區域</button>
+        <button id="saveWaypoints">儲存點位</button>
+    </div>
+    <p id="statusMessage"></p>
+
+    <script>
+        let socket = new WebSocket("ws://192.168.50.226:8765");
+        // let socket = new WebSocket("ws://192.168.31.145:8765");
+        let isSocketOpen = false;
+        
+        socket.onopen = () => {
+            console.log("WebSocket 連線成功");
+            isSocketOpen = true;
+        };
+        
+        socket.onerror = error => {
+            console.error("WebSocket 錯誤:", error);
+            let statusMessage = document.getElementById("statusMessage");
+            statusMessage.innerText = "WebSocket 連線失敗";
+            statusMessage.style = "margin-top: 8px; font-size: 18px; font-weight: bold; color: red;";
+        };
+        
+        socket.onmessage = event => {
+            console.log("WebSocket 接收資料:", event.data);
+            let response;
+            try {
+                response = JSON.parse(event.data);
+            } catch (error) {
+                console.error("JSON 解析失敗:", error);
+                return;
+            }
+            if (response.message) {
+                //document.getElementById("statusMessage").innerText = " " + response.message;
+                alert(response.message);
+            }
+        };
+        
+        //let defaultLocation = [24.136892670549653, 120.7109394796774]; //祥順公園
+        //let defaultLocation = [24.1219007936329, 120.67425338217791]; //中興大學
+        let defaultLocation = [24.119746029661943, 120.67711460082666]; 
+
+        let map = L.map('map').setView(defaultLocation, 19);
+        let drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+        
+        // ✅ 強制讓地圖在 500 毫秒後重新計算尺寸，解決初始灰畫面
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 500);
+        let streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap',
+            maxZoom: 22
+        });
+
+        let satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 22,
+            subdomains:['mt0','mt1','mt2','mt3'],
+            attribution: '&copy;衛星地圖'
+        });
+
+        // 加入預設地圖圖層
+        streetLayer.addTo(map);
+
+        // 加入圖層控制選單
+        L.control.layers({
+            "街道地圖": streetLayer,
+            "衛星地圖": satelliteLayer
+        }).addTo(map);
+
+        let defaultMarker = L.marker(defaultLocation, {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            })
+        }).addTo(map).bindPopup("中興大學").openPopup();
+        
+        let drawControl = new L.Control.Draw({
+            draw: {
+                marker: false,
+                polyline: false,
+                circle: false,
+                polygon: false,
+                circlemarker: false,
+                rectangle: true
+            },
+            edit: {
+                featureGroup: drawnItems,
+                edit: true,   // ✅ 還是能拖動調整
+                remove: false,
+                selectedPathOptions: {
+                    // 避免點到後進入「Edit mode」需要 Save/Cancel
+                    maintainColor: true
+                }
+            }
+        });
+        map.addControl(drawControl);
+        
+        // ➤ 畫完矩形時送出點位 & 顯示
+        map.on(L.Draw.Event.CREATED, function (e) {
+            if (!isSocketOpen) {
+                alert("WebSocket 尚未連線，請稍後再試");
+                return;
+            }
+
+            drawnItems.clearLayers();
+            drawnItems.addLayer(e.layer);
+
+            let waypoints = getRectangleCorners(e.layer);
+            sendWaypoints(waypoints);
+            updateInfo(waypoints);
+
+            // ✅ 編輯模式（調邊角）放開後更新一次
+            e.layer.on('edit', function () {
+                let updatedWaypoints = getRectangleCorners(e.layer);
+                updateInfo(updatedWaypoints);
+            });
+        });
+
+        // ➤ 編輯矩形時同步更新顯示
+        map.on('draw:edited', function (e) {
+            e.layers.eachLayer(function (layer) {
+                let waypoints = getRectangleCorners(layer);
+                updateInfo(waypoints);
+            });
+        });
+
+        map.on('draw:editvertex', function (e) {
+            e.layers.eachLayer(function (layer) {
+                let waypoints = getRectangleCorners(layer);
+                updateInfo(waypoints);
+            });
+        });
+        
+        // ➤ 提取矩形角落點位
+        function getRectangleCorners(layer) {
+            let bounds = layer.getBounds();
+            let corners = [
+                bounds.getNorthWest(),
+                bounds.getNorthEast(),
+                bounds.getSouthEast(),
+                bounds.getSouthWest()
+            ];
+            return corners.map((pos, index) => ({
+                point_index: index + 1,
+                latitude: pos.lat,
+                longitude: pos.lng
+            }));
+        }
+        
+        // ➤ 送出點位資料
+        function sendWaypoints(waypoints) {
+            let message = {
+                type: "save_waypoints",
+                waypoints: waypoints
+            };
+        
+            document.getElementById("statusMessage").style = "margin-top: 8px; font-size: 18px; font-weight: bold; color: red;";
+            setTimeout(() => {
+                socket.send(JSON.stringify(message));
+            }, 200);
+        }
+        
+        // ➤ 顯示點位資訊
+        function updateInfo(waypoints) {
+            let latlng1 = L.latLng(waypoints[0].latitude, waypoints[0].longitude); // NW
+            let latlng2 = L.latLng(waypoints[1].latitude, waypoints[1].longitude); // NE
+            let latlng3 = L.latLng(waypoints[3].latitude, waypoints[3].longitude); // SW
+
+            let width = latlng1.distanceTo(latlng2);  // 水平距離（上邊）
+            let height = latlng1.distanceTo(latlng3); // 垂直距離（左邊）
+
+            document.getElementById("info").innerHTML = `
+                <div class="markers-info" style="margin-bottom: 1px;">
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 1px;">矩形四點經緯度：</div>
+                    ${waypoints.map((pos, index) => `點 ${index + 1}: (${pos.latitude}, ${pos.longitude})`).join("<br>")}
+                    <div style="font-size: 20px;">
+                        ➤ <b>寬度</b>：${width.toFixed(2)} 公尺
+                        ➤ <b>長度</b>：${height.toFixed(2)} 公尺
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ➤ 手動儲存按鈕
+        document.getElementById("saveWaypoints").addEventListener("click", function () {
+            if (!drawnItems.getLayers().length) {
+                alert("請先畫一個矩形區域！");
+                return;
+            }
+        
+            let bounds = drawnItems.getBounds();
+            let corners = [
+                bounds.getNorthWest(),
+                bounds.getNorthEast(),
+                bounds.getSouthEast(),
+                bounds.getSouthWest()
+            ];
+        
+            let waypoints = corners.map((pos, index) => ({
+                point_index: index + 1,
+                latitude: pos.lat,
+                longitude: pos.lng
+            }));
+        
+            if (!isSocketOpen) {
+                alert("WebSocket 尚未連線，請稍後再試");
+                return;
+            }
+        
+            //document.getElementById("statusMessage").innerText = " 正在傳送...";
+            document.getElementById("statusMessage").style = "margin-top: 8px; font-size: 18px; font-weight: bold; color: red;";
+        
+            setTimeout(() => {
+                socket.send(JSON.stringify({
+                    type: "save_waypoints",
+                    waypoints: waypoints
+                }));
+            }, 200);
+        
+            updateInfo(waypoints);
+        });
+        
+        // ➤ 清除按鈕
+        document.getElementById("resetMarkers").addEventListener("click", function () {
+            drawnItems.clearLayers();
+            document.getElementById("info").innerHTML = "";
+        });
+        </script>
+        
+</body>
+</html>
+
+
+
+
+
+
+
+

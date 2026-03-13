@@ -1,0 +1,356 @@
+body {
+    background: linear-gradient(to bottom, #1c2b39, #2e3b4e);
+    margin: 0;
+    color: white;
+    min-height: 100%;
+    overflow: hidden;
+}
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    margin-left: 60px;
+    width: 90%;
+    justify-content: flex-end;
+}
+.header {
+    display: flex;
+    font-size: 2rem;
+    justify-content: center;  /* 水平置中 */
+    align-items: center;  /* 垂直置中 */
+    height: 100px;  /* 可以調整標題區塊的高度 */
+}
+
+/*標籤*/
+.tab {
+    display: flex;
+    border-bottom: 2px solid white;
+    justify-content: flex-start;
+}
+.tab button {
+    background-color: white;
+    border: 1px solid white;
+    outline: none;
+    cursor: pointer;
+    padding: 1px 15px;
+    margin-right: 1.5px;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+    border-radius: 10px 10px 0 0
+    
+}
+.tab button:hover {
+    background-color: white;
+}
+.tab button.active {
+    background-color: white;
+    border-bottom: 2px solid black;
+}
+.tabcontent {
+    display: none;
+    padding: 0px;
+    border: 2px solid white;
+    width: 100%; /* 讓內容區域寬度填滿螢幕 */
+    box-sizing: border-box; /* 確保邊框不影響總寬度 */
+
+}
+.tabcontent.active {
+    display: block;
+}
+/*經緯度 海拔的格子*/
+.box {
+    border: 1px solid #1e3d58;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 100px;
+    font-size: 2rem;
+    flex: 0 1 calc(100% - 3px);
+    
+}
+.box[data-color="yellow"] {
+    background-color: #ffd700;
+}
+/*攝影機畫面跟地圖*/
+/* 確保畫面布局 */
+.image-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: 15px;
+}
+
+/* 攝影機畫面區域 */
+.video-container {
+    width: 100%; /* 左半邊佔比 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+/* 建模後地圖區域 */
+.map-container {
+    width: 120%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+/* 標題 */
+.video-container h2, .map-container h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: white;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+/* 攝影機畫面與建模畫面 */
+video, .map {
+    width: 50%;
+    height: 400px; /* 根據需求調整 */
+    border: 2px solid white;
+    border-radius: 10px;
+}
+.lidar-placeholder {
+    width: 535px; /* 讓大小和攝影機畫面相匹配 */
+    max-width: 640px;
+    height: 400px; /* 這個值可以根據攝影機畫面的實際高度調整 */
+    border: 2px solid white; /* 白色邊框 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent; /* 背景色確保可視 */
+}
+/*電池*/
+.battery {
+    left: 10px;
+    width: 95px;
+    height: 150px;
+    bottom: 1px;
+    border: 4px solid black;
+    border-radius: 10px;
+    position: relative;
+    display: inline-block;
+    background-color: #f0f0f0;
+    margin-right: 20px;
+}
+.battery::after {
+    content: '';
+    width: 40px;
+    height: 10px;
+    background-color: black;
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+.battery-level {
+    width: 100%;
+    right: -0.5px;
+    background-color: #76c7c0;
+    border-radius: 0px 0px 0 0;
+    position: absolute;
+    bottom: 0;
+    transition: height 0.3s ease;
+}
+.battery-level.low {
+    background-color: #f05454;
+}
+.battery-level.medium {
+    background-color: #f7c74f;
+}
+.battery-level.high {
+    background-color: green;
+}
+.battery-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -10px;
+}
+.battery-container div {
+    font-size: 1rem;
+    color: white;
+    margin-top: 5px;
+    margin-left: 60px;
+}
+/*航向角*/
+.compass {
+    padding-right:10px;
+    padding-bottom: 50px;
+    padding-left: 150px;
+    width: 340px;  /* 指南針的寬度 */
+    height: 250px; /* 指南針的高度 */
+}
+/* 外圓 */
+.compass-outer {
+    width: 100%;
+    height: 80%;
+    border: 10px solid #333333; /* 外邊框顏色 */
+    border-radius: 50%; /* 圓形 */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* 外圈陰影 */
+    background: radial-gradient(circle, #8A8A8A 100%, black 0%); /* 徑向漸變背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 內圓 */
+.compass-inner {
+    width: 90%;
+    height: 90%;
+    border-radius: 50%; /* 圓形 */
+    background: #A0A0A0; /* 徑向漸變背景 */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 方向指示文字 */
+.directions {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* 禁止事件點擊 */
+}
+
+.direction1 {
+    position: absolute;
+    font-size: 22px;
+    font-weight: bold;
+    color: black;
+    font-family: 'Brush Script MT', cursive; /* 指定具體草寫字型 */
+}
+
+
+/* 各方向文字位置 */
+.north { top: 5px; }
+.east { right: 5px; }
+.south { bottom: 5px; }
+.west { left: 5px; }
+
+.direction2 {
+    position: absolute;
+    font-size: 15px; /* 字體大小 */
+    color: black; /* 顏色 */
+}
+.northeast { top: 30px; right: 25px; }  /* 東北 */
+.southeast { bottom: 30px; right: 25px; } /* 東南 */
+.southwest { bottom: 30px; left: 25px; }  /* 西南 */
+.northwest { top: 30px; left: 25px; } /* 西北 */
+
+/* 指針樣式 */
+.needle {
+    position: absolute;
+    width: 4.5px; /* 指針寬度 */
+    height: 55%; /* 指針長度 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: center center; /* 旋轉中心點 */
+}
+
+/* 指針的上半部分（紅色） */
+.needle-half.top {
+    width: 100%;
+    height: 50%;
+    background-color: #FF3B3B; /* 顏色 */
+}
+
+/* 指針的下半部分（白色） */
+.needle-half.bottom {
+    width: 100%;
+    height: 50%;
+    background-color: #3F84B5; /* 顏色 */
+    border-top: 1px solid black; /* 分界線 */
+}
+
+/* 指針中心點 */
+.center-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: black; /* 顏色 */
+    border-radius: 50%; /* 圓形 */
+    z-index: 2; /* 層級 */
+}
+/* 速度表 */
+.speed-container {
+    text-align: center;
+    padding-left: 150px;
+    padding-bottom:35px;
+}
+.speed-canvas {
+    background-color: #222;
+    border-radius: 50%;
+}
+/* 最短路徑按鈕 */
+#open-Shortest-button {
+    position: absolute;
+    margin-top: 21px;
+    left: 73.5%;
+    padding: 10px 25px;
+    background-color: #4286F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    font-weight: bold; /* 讓字體變粗，提高可讀性 */
+}
+/*飛控點位 建圖按鈕控制*/
+.button-container {
+    display: flex;
+    justify-content: space-between; /* 讓按鈕分散排列，一個靠左一個靠右 */
+    align-items: center; /* 垂直對齊 */
+    position: absolute;
+    top: 10px; /* 調整按鈕在畫面上的高度 */
+    left: 0;
+    width: 100%; /* 讓容器占滿整個寬度 */
+    padding: 0 2px; /* 給左右留點間距，避免貼到邊界 */
+    box-sizing: border-box;
+
+}
+/*飛控點位 建圖按鈕*/
+#flight-point-button, #open-dronemapping2-button {
+    padding: 14px 10px;
+    background-color: #4286F3;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 23px; /* 調大字體 */
+    font-weight: bold; /* 讓字體變粗，提高可讀性 */
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+#flight-point-button, #open-dronemapping2-button, #open-Shortest-button, #camera-button {
+    background-color: 	#d32f2f;
+}
+/*拍攝按鈕*/
+.camera-btn {
+    margin-top: 18px;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 20px;
+    margin-right: 5px;
+    white-space: nowrap;       /* 防止文字換行 */
+    width: auto;               /* 自動寬度，避免太窄造成斷行 */
+  }
+  .camera-btn:hover {
+    background-color: #b71c1c;  /* 滑鼠滑過更深紅 */
+  }
