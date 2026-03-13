@@ -106,7 +106,7 @@ async def send_data():
     uri = "ws://192.168.31.145:8765"
     async with websockets.connect(uri) as websocket:
         await websocket.send(json.dumps({"device_id": device_id}))
-        print(f"✅ 設備 {device_id} 已連線到伺服器")
+        print(f"設備 {device_id} 已連線到伺服器")
 
         async def receive_pings():
             while True:
@@ -114,7 +114,7 @@ async def send_data():
                     await websocket.ping()
                     await asyncio.sleep(10)
                 except websockets.exceptions.ConnectionClosed:
-                    print("❌ 連線已斷開！")
+                    print("連線已斷開！")
                     break
 
         async def handle_incoming():
@@ -125,16 +125,16 @@ async def send_data():
                     data = json.loads(message)
                     if data.get("type") == "waypoints":
                         waypoints = data["waypoints"]
-                        print("📍 收到飛控點位:", waypoints)
+                        print("收到飛控點位:", waypoints)
                         with open("waypoints.txt", "w", encoding="utf-8") as f:
                             for wp in waypoints:
                                 f.write(f"{wp['latitude']}, {wp['longitude']}\n")
-                        print("✅ 成功寫入 waypoints.txt")
+                        print("成功寫入 waypoints.txt")
 
                     elif data.get("type") == "capture_config":
                         capture_enabled = data.get("enabled", False)
                         capture_interval = data.get("interval", 1)
-                        print(f"⚙️ 設定更新: 拍照功能 = {capture_enabled}, 間隔 = {capture_interval} 秒")
+                        print(f"設定更新: 拍照功能 = {capture_enabled}, 間隔 = {capture_interval} 秒")
                 except json.JSONDecodeError:
                     pass
 
@@ -152,7 +152,7 @@ async def send_data():
                         video_writer = cv2.VideoWriter(video_output_path, fourcc, fps, (frame_width, frame_height))
                     video_writer.write(frame)
                 except Exception as e:
-                    print(f"⚠️ 錄影失敗: {e}")
+                    print(f"錄影失敗: {e}")
 
             sensor_data = {
                 "longitude": longitude_deg,
@@ -169,7 +169,7 @@ async def send_data():
                 if frame_bytes:
                     await websocket.send(frame_bytes)
             except websockets.exceptions.ConnectionClosed:
-                print("❌ 連線已斷開，嘗試重新連線...")
+                print("連線已斷開，嘗試重新連線...")
                 break
 
 if __name__ == "__main__":
@@ -181,4 +181,4 @@ if __name__ == "__main__":
         cap.release()
         if video_writer:
             video_writer.release()
-            print(f"📽️ 錄影已完成，儲存為 {video_output_path}")
+            print(f"錄影已完成，儲存為 {video_output_path}")
