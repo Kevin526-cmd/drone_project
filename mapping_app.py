@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import subprocess
@@ -10,7 +9,7 @@ import time
 app = Flask(__name__)
 CORS(app)
 
-# 創建一個線程安全的佇列來存儲日誌
+
 log_queue = queue.Queue()
 mapping_status = {
     "status": "idle", 
@@ -25,7 +24,7 @@ def capture_output(process, queue):
         for line in process.stdout:
             line = line.strip()
             queue.put(line)
-            print(line)  # 同時在控制台打印
+            print(line) 
         process.wait()
     except Exception as e:
         queue.put(f"Error: {str(e)}")
@@ -37,7 +36,7 @@ def index():
 @app.route('/mapping_status', methods=['GET'])
 def get_mapping_status():
     """提供建圖狀態的端點"""
-    # 收集佇列中的最新日誌
+  
     current_logs = []
     while not log_queue.empty():
         current_logs.append(log_queue.get())
@@ -49,7 +48,7 @@ def get_mapping_status():
 def select_folder():
     global mapping_status
     try:
-        # 重置狀態
+       
         mapping_status = {
             "status": "processing", 
             "message": "開始建圖", 
@@ -57,7 +56,7 @@ def select_folder():
             "logs": []
         }
         
-        # 使用子進程執行建圖腳本
+        
         process = subprocess.Popen(
             ["python", "dronemapping.py"],
             stdout=subprocess.PIPE,
@@ -65,14 +64,14 @@ def select_folder():
             text=True
         )
 
-        # 啟動線程來捕獲輸出
+       
         output_thread = threading.Thread(
             target=capture_output, 
             args=(process, log_queue)
         )
         output_thread.start()
 
-        # 如果成功，返回初始響應
+       
         return jsonify({
             "message": "建圖進行中",
             "status": "processing"

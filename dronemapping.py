@@ -1,4 +1,3 @@
-# dronemapping2.py
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
@@ -8,7 +7,7 @@ import time
 from PIL import Image
 
 def run_odm():
-    # 初始化 tkinter 並隱藏主視窗，只顯示選資料夾對話框
+    
     root = tk.Tk()
     root.withdraw()
 
@@ -52,7 +51,7 @@ def run_odm():
 
     if process.returncode == 0:
         print("建圖成功")
-        # 嘗試轉檔
+        
         tif_path = os.path.join(project_path, dataset_name, "odm_orthophoto", "odm_orthophoto.tif")
         jpg_path = os.path.join(project_path, dataset_name, "odm_orthophoto", "odm_orthophoto.jpg")
 

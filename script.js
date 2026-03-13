@@ -1,15 +1,14 @@
-// const socket = new WebSocket('ws://localhost:8765'); // 替换为你的 WebSocket 地址
+// const socket = new WebSocket('ws://localhost:8765'); 
 const socket = new WebSocket('ws://192.168.137.1:8765');
-let currentCompassAngle = 0; // 當前指南針角度 (初始化為 0)
+let currentCompassAngle = 0; 
 
-// 讓指南針平滑旋轉的函數
 function smoothRotateCompass(targetAngle) {
     function updateRotation() {
         currentCompassAngle += (targetAngle - currentCompassAngle) * 0.1;
 
         document.getElementById('compassNeedle').style.transform = `rotate(${currentCompassAngle}deg)`;
 
-        // 只要當前角度與目標角度的差距大於 0.1 度，就繼續動畫
+      
         if (Math.abs(currentCompassAngle - targetAngle) > 0.1) {
             requestAnimationFrame(updateRotation);
         }
@@ -20,7 +19,7 @@ function smoothRotateCompass(targetAngle) {
 
 socket.onopen = function() {
     console.log("WebSocket connected.");
-    const deviceID = 1; // 示例设备ID
+    const deviceID = 1; // 設備ID
     socket.send(JSON.stringify({ device_id: deviceID }));
 };
 
@@ -28,12 +27,12 @@ socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
     console.log("Received data:", data);
 
-    // 更新设备ID
+    // 更新設備ID
     if (data.device_id) {
         document.getElementById('device_id').innerText = `Device ${data.device_id}`;
     }
 
-    // 更新电池电量
+    // 更新電池電量
     if (data.data && data.data.battery_capacity !== undefined) {
         const batteryLevel = document.getElementById('battery_level_drone1');
         const batteryCapacity = data.data.battery_capacity;
@@ -84,7 +83,7 @@ socket.onmessage = function(event) {
     }
 };
 
-// === 控制拍照功能 ===
+// 控制拍照功能 
 function enablePhotoCapture() {
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
@@ -93,9 +92,9 @@ function enablePhotoCapture() {
             enabled: true,
             interval: 1
         }));
-        alert("✅ 已啟用拍照");
+        alert("已啟用拍照");
     } else {
-        alert("❌ WebSocket 尚未連線");
+        alert("WebSocket 尚未連線");
     }
 }
 
@@ -107,9 +106,9 @@ function disablePhotoCapture() {
             enabled: false,
             interval: 1
         }));
-        alert("🛑 已關閉拍照");
+        alert("已關閉拍照");
     } else {
-        alert("❌ WebSocket 尚未連線");
+        alert("WebSocket 尚未連線");
     }
 }
 

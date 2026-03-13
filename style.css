@@ -21,7 +21,7 @@ body {
     height: 100px;  /* 可以調整標題區塊的高度 */
 }
 
-/*標籤*/
+
 .tab {
     display: flex;
     border-bottom: 2px solid white;
@@ -50,7 +50,7 @@ body {
     display: none;
     padding: 0px;
     border: 2px solid white;
-    width: 100%; /* 讓內容區域寬度填滿螢幕 */
+    width: 100%; 
     box-sizing: border-box; /* 確保邊框不影響總寬度 */
 
 }
@@ -98,7 +98,7 @@ body {
 
 }
 
-/* 標題 */
+
 .video-container h2, .map-container h2 {
     text-align: center;
     font-size: 2rem;
@@ -110,15 +110,15 @@ body {
 /* 攝影機畫面與建模畫面 */
 video, .map {
     width: 50%;
-    height: 400px; /* 根據需求調整 */
+    height: 400px; 
     border: 2px solid white;
     border-radius: 10px;
 }
 .lidar-placeholder {
     width: 535px; /* 讓大小和攝影機畫面相匹配 */
     max-width: 640px;
-    height: 400px; /* 這個值可以根據攝影機畫面的實際高度調整 */
-    border: 2px solid white; /* 白色邊框 */
+    height: 400px; 
+    border: 2px solid white;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -219,7 +219,7 @@ video, .map {
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: none; /* 禁止事件點擊 */
+    pointer-events: none
 }
 
 .direction1 {
@@ -227,7 +227,7 @@ video, .map {
     font-size: 22px;
     font-weight: bold;
     color: black;
-    font-family: 'Brush Script MT', cursive; /* 指定具體草寫字型 */
+    font-family: 'Brush Script MT', cursive; 
 }
 
 
@@ -258,18 +258,18 @@ video, .map {
     transform-origin: center center; /* 旋轉中心點 */
 }
 
-/* 指針的上半部分（紅色） */
+
 .needle-half.top {
     width: 100%;
     height: 50%;
-    background-color: #FF3B3B; /* 顏色 */
+    background-color: #FF3B3B; 
 }
 
-/* 指針的下半部分（白色） */
+
 .needle-half.bottom {
     width: 100%;
     height: 50%;
-    background-color: #3F84B5; /* 顏色 */
+    background-color: #3F84B5; 
     border-top: 1px solid black; /* 分界線 */
 }
 
@@ -278,9 +278,9 @@ video, .map {
     position: absolute;
     width: 10px;
     height: 10px;
-    background-color: black; /* 顏色 */
-    border-radius: 50%; /* 圓形 */
-    z-index: 2; /* 層級 */
+    background-color: black; 
+    border-radius: 50%; 
+    z-index: 2; 
 }
 /* 速度表 */
 .speed-container {
@@ -305,7 +305,7 @@ video, .map {
     cursor: pointer;
     font-size: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    font-weight: bold; /* 讓字體變粗，提高可讀性 */
+    font-weight: bold; 
 }
 /*飛控點位 建圖按鈕控制*/
 .button-container {
@@ -313,10 +313,10 @@ video, .map {
     justify-content: space-between; /* 讓按鈕分散排列，一個靠左一個靠右 */
     align-items: center; /* 垂直對齊 */
     position: absolute;
-    top: 10px; /* 調整按鈕在畫面上的高度 */
+    top: 10px; 
     left: 0;
-    width: 100%; /* 讓容器占滿整個寬度 */
-    padding: 0 2px; /* 給左右留點間距，避免貼到邊界 */
+    width: 100%; 
+    padding: 0 2px; 
     box-sizing: border-box;
 
 }
@@ -348,9 +348,9 @@ video, .map {
     cursor: pointer;
     font-size: 20px;
     margin-right: 5px;
-    white-space: nowrap;       /* 防止文字換行 */
-    width: auto;               /* 自動寬度，避免太窄造成斷行 */
+    white-space: nowrap;       
+    width: auto;               
   }
   .camera-btn:hover {
-    background-color: #b71c1c;  /* 滑鼠滑過更深紅 */
+    background-color: #b71c1c;  
   }

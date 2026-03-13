@@ -1,11 +1,9 @@
-# test_client.py
-
 import asyncio
 import websockets
 import json
 import random
 
-# 連線參數
+
 WS_URI      = "ws://localhost:8765"
 DEVICE_ID   = 1      
 SEND_COUNT  = 0      

@@ -145,7 +145,7 @@ scale_ratio = 0.5
 def process_path():
     global points, image, prev_image
     start, end = points
-    start_time = time.time()  # ⏱️ 開始計時
+    start_time = time.time()  # 開始計時
     #path = prm_search(mask_pred, start, end)
     path = prm_search(expanded_mask, start, end)
 
@@ -182,11 +182,11 @@ def process_path():
 
         display_image = cv2.resize(image, (0, 0), fx=scale_ratio, fy=scale_ratio)
         cv2.imshow("Path Finder", cv2.cvtColor(display_image, cv2.COLOR_RGB2BGR))
-        #elapsed_time = time.time() - start_time  # ⏱️ 計算花費秒數
+        #elapsed_time = time.time() - start_time  # 計算花費秒數
         #messagebox.showinfo("計算完成", f"路徑計算與顯示總花費時間：約 {elapsed_time:.3f} 秒")
 
-        #elapsed_time = time.time() - start_time  # ⏱️ 計算花費秒數
-        #print(f"🚀 路徑計算與顯示總花費時間：約 {elapsed_time:.3f} 秒")
+        #elapsed_time = time.time() - start_time  # 計算花費秒數
+        #print(f"路徑計算與顯示總花費時間：約 {elapsed_time:.3f} 秒")
 
     else:
         messagebox.showerror("路徑錯誤", "PRM 無法找到可行走路徑，請重新選擇！")

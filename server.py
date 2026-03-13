@@ -8,7 +8,7 @@ import subprocess
 import numpy as np
 import cv2
 
-# === 設置 MySQL 連線池 ===
+
 db_pool = None
 map_db_pool = None
 
@@ -138,10 +138,10 @@ async def handler(websocket, path):
                 print(f"設備 {device_id} 傳來影像數據 ({len(message)} bytes)")
                 await handle_camera_data(device_id, message)
 
-            else:  # 處理 JSON 文字數據
+            else:  
                 data = json.loads(message)
                 
-                # 印出接收到的感測數據
+                
                 print(f"來自 {device_id} 的感測數據: {data}")
 
                 if data.get("type") == "save_waypoints":
