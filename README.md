@@ -44,12 +44,3 @@ In disaster rescue scenarios, responders need to quickly identify victim locatio
 - 設計無人機的飛行
 - 協助系統測試、結果展示與功能驗證
 
-## Project Structure
-```text
-project/
-│── data/
-│── models/
-│── drone_module/
-│── path_planning/
-│── results/
-│── README.md
